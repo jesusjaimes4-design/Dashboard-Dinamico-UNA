@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero Avanzado - ElectroTech vs TecnoOrinoco</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        .kpi-transition { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col justify-between antialiased select-none">
+
+    <!-- HEADER EJECUTIVO -->
+    <header class="bg-slate-900 border-b border-slate-800 px-5 py-2.5 flex items-center justify-between shrink-0 shadow-lg z-10">
+        <div class="flex items-center space-x-3">
+            <div class="bg-cyan-500/15 p-2 rounded-xl border border-cyan-500/30 text-cyan-400">
+                <i class="fa-solid fa-chart-line text-base"></i>
+            </div>
+            <div>
+                <h1 class="text-sm md:text-base font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                    ElectroTech Solutions C.A. vs. Comercializadora TecnoOrinoco C.A.
+                </h1>
+                <p class="text-[11px] text-slate-400">Modelo Financiero Realista Integral y Simulación Estratégica</p>
+            </div>
+        </div>
+
+        <!-- PESTAÑAS DE NAVEGACIÓN -->
+        <nav class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700">
+            <button onclick="switchTab('resumen')" id="tabResumen" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-cyan-600 text-white shadow">
+                <i class="fa-solid fa-gauge-high mr-1"></i> Dashboard KPIs
+            </button>
+            <button onclick="switchTab('balance')" id="tabBalance" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+                <i class="fa-solid fa-file-invoice-dollar mr-1"></i> Balance Real
+            </button>
+            <button onclick="switchTab('pyg')" id="tabPyg" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+                <i class="fa-solid fa-coins mr-1"></i> PyG
+            </button>
+            <button onclick="switchTab('simulador')" id="tabSimulador" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+                <i class="fa-solid fa-sliders mr-1"></i> Simulador
+            </button>
+        </nav>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="flex-grow p-3 max-w-7xl mx-auto w-full overflow-hidden flex flex-col justify-center">
+        
+        <!-- VISTA 1: DASHBOARD DE KPIS Y GRÁFICOS -->
+        <section id="viewResumen" class="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full items-stretch overflow-y-auto lg:overflow-hidden pr-1">
+            
+            <!-- COLUMNA IZQUIERDA: 4 KPIS FINANCIEROS CLAVE AMPLIADOS + SELECTOR MÚLTIPLE COMPACTO -->
+            <div class="lg:col-span-6 flex flex-col gap-3">
+                
+                <!-- SELECTOR DE EMPRESA PARA KPIs (NUEVA FUNCIONALIDAD AÑADIDA) -->
+                <div class="bg-slate-900 border border-slate-800 p-2 rounded-xl shadow-lg flex justify-between items-center">
+                    <span class="text-[11px] font-bold text-slate-300 flex items-center ml-1">
+                        <i class="fa-solid fa-magnifying-glass-chart text-cyan-400 mr-1.5"></i> Análisis Comparativo KPI
+                    </span>
+                    <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800 space-x-1">
+                        <button onclick="setKpiView('electro')" id="kpiBtnElectro" class="px-2.5 py-1 rounded text-[10px] font-semibold transition bg-cyan-600 text-white shadow">
+                            ElectroTech
+                        </button>
+                        <button onclick="setKpiView('tecno')" id="kpiBtnTecno" class="px-2.5 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white">
+                            TecnoOrinoco
+                        </button>
+                        <button onclick="setKpiView('comp')" id="kpiBtnComp" class="px-2.5 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white">
+                            Comparativa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 KPIS EN UN GRID DE 4 COLUMNAS CON DESCRIPCIÓN COMPLETA (DINÁMICOS) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    
+                    <!-- KPI 1: Liquidez Corriente -->
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex flex-col justify-between shadow-lg">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] text-slate-400 font-semibold uppercase truncate">Liquidez Corriente</span>
+                            <i class="fa-solid fa-droplet text-cyan-400 text-xs"></i>
+                        </div>
+                        <div class="my-1">
+                            <span id="kpi1_val" class="text-sm font-bold text-cyan-400 font-mono kpi-transition">2.30x</span>
+                            <span id="kpi1_sub" class="text-[9px] text-emerald-400 block font-medium kpi-transition">▲ Solvente</span>
+                        </div>
+                        <p id="kpi1_desc" class="text-[9px] text-slate-400 leading-tight kpi-transition">Activo Cte / Pasivo Cte. Cubre de sobra las deudas de corto plazo.</p>
+                    </div>
+
+                    <!-- KPI 2: Margen Neto Operativo -->
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex flex-col justify-between shadow-lg">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] text-slate-400 font-semibold uppercase truncate">Margen Neto</span>
+                            <i class="fa-solid fa-arrow-trend-up text-emerald-400 text-xs"></i>
+                        </div>
+                        <div class="my-1">
+                            <span id="kpi2_val" class="text-sm font-bold text-emerald-400 font-mono kpi-transition">32.4%</span>
+                            <span id="kpi2_sub" class="text-[9px] text-emerald-400 block font-medium kpi-transition">▲ Alta Rentabilidad</span>
+                        </div>
+                        <p id="kpi2_desc" class="text-[9px] text-slate-400 leading-tight kpi-transition">Utilidad Neta / Ventas Totales. Eficiencia operativa digital superior.</p>
+                    </div>
+
+                    <!-- KPI 3: Endeudamiento Total -->
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex flex-col justify-between shadow-lg">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] text-slate-400 font-semibold uppercase truncate">Endeudamiento</span>
+                            <i class="fa-solid fa-file-invoice-dollar text-amber-400 text-xs"></i>
+                        </div>
+                        <div class="my-1">
+                            <span id="kpi3_val" class="text-sm font-bold text-amber-400 font-mono kpi-transition">38.5%</span>
+                            <span id="kpi3_sub" class="text-[9px] text-cyan-400 block font-medium kpi-transition">● Controlado</span>
+                        </div>
+                        <p id="kpi3_desc" class="text-[9px] text-slate-400 leading-tight kpi-transition">Pasivo Total / Activo Total. Baja exposición a pasivos onerosos.</p>
+                    </div>
+
+                    <!-- KPI 4: Autonomía Patrimonial -->
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex flex-col justify-between shadow-lg">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] text-slate-400 font-semibold uppercase truncate">Autonomía</span>
+                            <i class="fa-solid fa-building-columns text-indigo-400 text-xs"></i>
+                        </div>
+                        <div class="my-1">
+                            <span id="kpi4_val" class="text-sm font-bold text-indigo-400 font-mono kpi-transition">61.5%</span>
+                            <span id="kpi4_sub" class="text-[9px] text-emerald-400 block font-medium kpi-transition">▲ Independiente</span>
+                        </div>
+                        <p id="kpi4_desc" class="text-[9px] text-slate-400 leading-tight kpi-transition">Patrimonio Neto / Activo Total. Sólido respaldo de capital propio.</p>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN SELECTOR MÚLTIPLE DE ESTADOS FINANCIEROS (SUB-TABS) -->
+                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-lg flex-grow flex flex-col justify-between min-h-0">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold text-slate-200 flex items-center">
+                            <i class="fa-solid fa-layer-group text-cyan-400 mr-1.5"></i> Detalle Directivo
+                        </h4>
+                        <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800 space-x-1">
+                            <button onclick="switchSubTab('balance')" id="subTabBalance" class="px-2 py-1 rounded text-[10px] font-semibold transition bg-cyan-600 text-white shadow">
+                                Balance General
+                            </button>
+                            <button onclick="switchSubTab('pyg')" id="subTabPyg" class="px-2 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white">
+                                PyG / Resultados
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor dinámico ajustado -->
+                    <div id="subViewContainer" class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 overflow-y-auto text-xs flex-grow">
+                        <!-- Vista Balance General Compacto con Pestañas de Detalle -->
+                        <div id="subViewBalance" class="space-y-1.5">
+                            <div class="flex justify-between text-[11px] font-semibold text-cyan-400 border-b border-slate-800 pb-1">
+                                <span>Partida Balance (Consolidado)</span>
+                                <span>ElectroTech vs TecnoOrinoco</span>
+                            </div>
+
+                            <!-- Partida 1: Efectivo -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between items-center text-[10px] text-slate-300 bg-slate-900/50 p-1 rounded">
+                                    <span class="text-slate-400">Efectivo / Caja:</span>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-mono">$45,000 <span class="text-amber-400">($12,500)</span></span>
+                                        <button onclick="toggleDetail('detEfectivo')" class="text-[9px] bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white px-1.5 py-0.5 rounded transition">
+                                            <i class="fa-solid fa-chevron-down text-[8px]" id="icon_detEfectivo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="detEfectivo" class="hidden pl-3 pr-1 py-1 bg-slate-900/80 rounded border border-slate-800 text-[9px] space-y-1 text-slate-300">
+                                    <div class="flex justify-between"><span>• Cuentas Bancarias:</span> <span class="font-mono">$35,000 | $8,500</span></div>
+                                    <div class="flex justify-between"><span>• Otros Fondos:</span> <span class="font-mono">$10,000 | $4,000</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Partida 2: Cobrar -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between items-center text-[10px] text-slate-300 bg-slate-900/50 p-1 rounded">
+                                    <span class="text-slate-400">Cuentas por Cobrar:</span>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-mono">$28,500 <span class="text-amber-400">($34,000)</span></span>
+                                        <button onclick="toggleDetail('detCobrar')" class="text-[9px] bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white px-1.5 py-0.5 rounded transition">
+                                            <i class="fa-solid fa-chevron-down text-[8px]" id="icon_detCobrar"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="detCobrar" class="hidden pl-3 pr-1 py-1 bg-slate-900/80 rounded border border-slate-800 text-[9px] space-y-1 text-slate-300">
+                                    <div class="flex justify-between"><span>• Clientes 0-30 días:</span> <span class="font-mono">$22,000 | $20,000</span></div>
+                                    <div class="flex justify-between"><span>• Clientes >60 días:</span> <span class="font-mono">$6,500 | $14,000</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Partida 3: Inventario -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between items-center text-[10px] text-slate-300 bg-slate-900/50 p-1 rounded">
+                                    <span class="text-slate-400">Inventarios:</span>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-mono">$6,200 <span class="text-amber-400">($68,500)</span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between text-[10px] text-slate-300 font-semibold border-t border-slate-800 pt-1 mt-1">
+                                <span class="text-cyan-300">Total Activo:</span>
+                                <span class="font-mono text-cyan-300">$130,000 <span class="text-amber-400">($165,000)</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Vista Estado de Resultados Compacto (Oculto) -->
+                        <div id="subViewPyg" class="space-y-1.5 hidden">
+                            <div class="flex justify-between text-[11px] font-semibold text-emerald-400 border-b border-slate-800 pb-1">
+                                <span>Concepto PyG (Anual)</span>
+                                <span>Electro vs Tecno</span>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-300">
+                                <span class="text-slate-400">Ventas Netas:</span>
+                                <span class="font-mono">$210,000 <span class="text-amber-400">($340,000)</span></span>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-300">
+                                <span class="text-slate-400">Costo de Ventas:</span>
+                                <span class="font-mono">($42,000) <span class="text-amber-400">($265,000)</span></span>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-300 font-semibold border-t border-slate-800 pt-1">
+                                <span class="text-emerald-300">Utilidad Neta:</span>
+                                <span class="font-mono text-emerald-300">$68,000 (32%) <span class="text-amber-400">($24,200/7%)</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: GRÁFICOS Y PANEL DE SEMÁFORO INTERACTIVO -->
+            <div class="lg:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+                
+                <!-- Chart 1: Estructura de Activos -->
+                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-lg flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-xs font-semibold text-slate-200"><i class="fa-solid fa-chart-pie text-cyan-400 mr-1"></i> Activos</h3>
+                        <span class="text-[9px] bg-slate-800 text-cyan-300 px-2 py-0.5 rounded">Cte vs No Cte</span>
+                    </div>
+                    <div class="relative h-28 w-full flex items-center justify-center">
+                        <canvas id="assetChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Estructura de Capital -->
+                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-lg flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-xs font-semibold text-slate-200"><i class="fa-solid fa-chart-column text-cyan-400 mr-1"></i> Capital</h3>
+                        <span class="text-[9px] bg-slate-800 text-cyan-300 px-2 py-0.5 rounded">Pasivos vs Patrimonio</span>
+                    </div>
+                    <div class="relative h-28 w-full flex items-center justify-center">
+                        <canvas id="capitalChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Selector de Semáforo Financiero Interactivo -->
+                <div class="md:col-span-2 bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-lg flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold text-slate-200 flex items-center">
+                            <i class="fa-solid fa-traffic-light text-amber-400 mr-1.5"></i> Semáforo Operativo
+                        </h4>
+                        <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800 space-x-1">
+                            <button onclick="setSemaforo('verde')" id="btnSemaforoVerde" class="px-2.5 py-1 rounded text-[10px] font-semibold transition bg-emerald-600 text-white shadow flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-white mr-1.5 animate-pulse"></span> Verde
+                            </button>
+                            <button onclick="setSemaforo('amarillo')" id="btnSemaforoAmarillo" class="px-2.5 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 mr-1.5"></span> Amarillo
+                            </button>
+                            <button onclick="setSemaforo('rojo')" id="btnSemaforoRojo" class="px-2.5 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-rose-500 mr-1.5"></span> Rojo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="semaforoBox" class="bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/60 flex items-center justify-between gap-3">
+                        <div class="flex items-center space-x-2.5">
+                            <div id="semaforoIconBg" class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400 border border-emerald-500/30 shrink-0">
+                                <i id="semaforoIcon" class="fa-solid fa-circle-check text-sm"></i>
+                            </div>
+                            <div>
+                                <span id="semaforoTitle" class="text-xs font-bold text-emerald-400">[🟢 VERDE]: ElectroTech - Solvencia Óptima</span>
+                                <p id="semaforoDesc" class="text-[10px] text-slate-300 leading-tight mt-0.5">
+                                    Liquidez > 2.0x y autonomía > 60%. Operación sin restricciones de caja.
+                                </p>
+                            </div>
+                        </div>
+                        <span id="semaforoBadge" class="text-[10px] bg-emerald-900 text-emerald-200 px-2 py-1 rounded border border-emerald-700 shrink-0 font-mono">
+                            Riesgo Bajo
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Strategic Decision Panel -->
+                <div class="md:col-span-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between gap-3 shadow-lg">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="w-3 h-3 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
+                        <div>
+                            <h4 class="text-xs font-bold text-cyan-400">Decisión Estratégica Gerencial</h4>
+                            <p class="text-[11px] text-slate-300 leading-tight mt-0.5">
+                                Consolidar la expansión digital de ElectroTech y optimizar el ciclo de caja en TecnoOrinoco.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 2: BALANCE GENERAL REALISTA -->
+        <section id="viewBalance" class="hidden h-full flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex-grow flex flex-col">
+                <div class="bg-slate-800/80 px-4 py-2 border-b border-slate-700 flex justify-between items-center shrink-0">
+                    <h2 class="text-xs font-bold text-slate-200"><i class="fa-solid fa-table text-cyan-400 mr-2"></i> Estado de Situación Financiera (Balance General Consolidado en USD)</h2>
+                    <span class="text-[10px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800">Partidas Reales Verificadas</span>
+                </div>
+                <div class="overflow-y-auto flex-grow p-3">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400">
+                                <th class="py-2 px-3 font-semibold">Partida Financiera y Descripción Contable</th>
+                                <th class="py-2 px-3 font-semibold text-right text-cyan-400">ElectroTech Solutions</th>
+                                <th class="py-2 px-3 font-semibold text-right text-amber-400">TecnoOrinoco</th>
+                                <th class="py-2 px-3 font-semibold text-right text-indigo-400">Variación</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                            <!-- ACTIVO CIRCULANTE -->
+                            <tr class="bg-slate-950/50 font-bold text-slate-100"><td colspan="4" class="py-1.5 px-3">1. ACTIVO CIRCULANTE (CORRIENTE)</td></tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Efectivo y Equivalentes de Efectivo</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$45,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$12,500</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-emerald-400">+$32,500</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Cuentas por Cobrar Comerciales Netas</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$28,500</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$34,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-amber-400">-$5,500</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Inventarios de Mercancías e Insumos</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$6,200</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$68,500</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-rose-400">-$62,300</td>
+                            </tr>
+                            <tr class="bg-slate-900/40 font-semibold">
+                                <td class="py-1.5 px-3 pl-4">Total Activo Corriente</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-400">$79,700</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-amber-400">$115,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono">-$35,300</td>
+                            </tr>
+
+                            <!-- ACTIVO NO CORRIENTE -->
+                            <tr class="bg-slate-950/50 font-bold text-slate-100"><td colspan="4" class="py-1.5 px-3">2. ACTIVO FIJO (NO CORRIENTE)</td></tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Propiedad, Planta y Equipo</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$32,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$45,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono">-$13,000</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Activos Intangibles (Software propio)</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$18,300</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$5,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-emerald-400">+$13,300</td>
+                            </tr>
+                            <tr class="bg-slate-900/40 font-bold text-cyan-400 text-sm">
+                                <td class="py-2 px-3">TOTAL ACTIVO</td>
+                                <td class="py-2 px-3 text-right font-mono">$130,000</td>
+                                <td class="py-2 px-3 text-right font-mono">$165,000</td>
+                                <td class="py-2 px-3 text-right font-mono">-$35,000</td>
+                            </tr>
+
+                            <!-- PASIVO CIRCULANTE -->
+                            <tr class="bg-slate-950/50 font-bold text-slate-100"><td colspan="4" class="py-1.5 px-3">3. PASIVO Y PATRIMONIO</td></tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Pasivo Corriente (Proveedores, Impuestos)</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$34,700</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$92,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-emerald-400">-$57,300</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Deuda a Largo Plazo</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-300">$15,300</td>
+                                <td class="py-1.5 px-3 text-right font-mono">$10,300</td>
+                                <td class="py-1.5 px-3 text-right font-mono">+$5,000</td>
+                            </tr>
+                            <tr class="bg-slate-900/40 font-semibold">
+                                <td class="py-1.5 px-3 pl-4">Total Pasivo</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-cyan-400">$50,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-amber-400">$102,300</td>
+                                <td class="py-1.5 px-3 text-right font-mono">-$52,300</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 px-3 pl-6">Patrimonio Neto (Capital + Resultados)</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-indigo-300">$80,000</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-indigo-300">$62,700</td>
+                                <td class="py-1.5 px-3 text-right font-mono text-emerald-400">+$17,300</td>
+                            </tr>
+                            <tr class="bg-slate-900/40 font-bold text-indigo-400 text-sm">
+                                <td class="py-2 px-3">TOTAL PASIVO Y PATRIMONIO</td>
+                                <td class="py-2 px-3 text-right font-mono">$130,000</td>
+                                <td class="py-2 px-3 text-right font-mono">$165,000</td>
+                                <td class="py-2 px-3 text-right font-mono">-$35,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 3: ESTADO DE RESULTADOS (PyG) -->
+        <section id="viewPyg" class="hidden h-full flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex-grow flex flex-col">
+                <div class="bg-slate-800/80 px-4 py-2 border-b border-slate-700 flex justify-between items-center shrink-0">
+                    <h2 class="text-xs font-bold text-slate-200"><i class="fa-solid fa-coins text-emerald-400 mr-2"></i> Estado de Resultados (Pérdidas y Ganancias Anual Consolidado en USD)</h2>
+                    <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">Eficiencia y Rentabilidad Operativa</span>
+                </div>
+                <div class="overflow-y-auto flex-grow p-3">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400">
+                                <th class="py-2 px-3 font-semibold">Concepto Detallado de Ingresos y Egresos</th>
+                                <th class="py-2 px-3 font-semibold text-right text-cyan-400">ElectroTech Solutions</th>
+                                <th class="py-2 px-3 font-semibold text-right text-amber-400">TecnoOrinoco</th>
+                                <th class="py-2 px-3 font-semibold text-right text-emerald-400">Análisis</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                            <tr>
+                                <td class="py-2 px-3 font-bold text-slate-100">Ventas Netas Totales</td>
+                                <td class="py-2 px-3 text-right font-mono text-cyan-300">$210,000</td>
+                                <td class="py-2 px-3 text-right font-mono text-amber-300">$340,000</td>
+                                <td class="py-2 px-3 text-right font-mono">Mayor volumen en Tecno</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3 pl-6 text-slate-400">Menos: Costo de Ventas (CMV)</td>
+                                <td class="py-2 px-3 text-right font-mono text-slate-400">($42,000)</td>
+                                <td class="py-2 px-3 text-right font-mono text-slate-400">($265,000)</td>
+                                <td class="py-2 px-3 text-right font-mono text-rose-400">Costos altos en hardware</td>
+                            </tr>
+                            <tr class="bg-slate-900/40 font-semibold">
+                                <td class="py-2 px-3">(=) Utilidad Bruta Operativa</td>
+                                <td class="py-2 px-3 text-right font-mono text-cyan-400">$168,000 (80.0%)</td>
+                                <td class="py-2 px-3 text-right font-mono text-amber-400">$75,000 (22.1%)</td>
+                                <td class="py-2 px-3 text-right font-mono text-emerald-400">Electro 3.6x mayor margen</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3 pl-6 text-slate-400">Menos: Gastos de Personal y Admin.</td>
+                                <td class="py-2 px-3 text-right font-mono text-slate-400">($73,000)</td>
+                                <td class="py-2 px-3 text-right font-mono text-slate-400">($36,000)</td>
+                                <td class="py-2 px-3 text-right font-mono">Electro invierte en talento</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3 pl-6 text-slate-400">Menos: Impuestos e Intereses</td>
+                                <td class="py-2 px-3 text-right font-mono text-slate-400">($15,000)</td>
+                                <td class="py-2 px-3 text-right font-mono text-slate-400">($8,800)</td>
+                                <td class="py-2 px-3 text-right font-mono">-</td>
+                            </tr>
+                            <tr class="bg-slate-900/60 font-bold text-emerald-400 text-sm">
+                                <td class="py-2.5 px-3">(=) UTILIDAD NETA DEL EJERCICIO</td>
+                                <td class="py-2.5 px-3 text-right font-mono">$68,000 (32.4%)</td>
+                                <td class="py-2.5 px-3 text-right font-mono">$24,200 (7.1%)</td>
+                                <td class="py-2.5 px-3 text-right font-mono">Electro muy superior</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 4: SIMULADOR & TOMA DE DECISIONES -->
+        <section id="viewSimulador" class="hidden h-full flex flex-col justify-between">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 h-full">
+                <div class="md:col-span-6 bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex flex-col justify-between shadow-xl">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-200 mb-2 flex items-center">
+                            <i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> Simulador de Escenarios (ElectroTech)
+                        </h3>
+                        
+                        <div class="space-y-4 mt-4">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-300">Crecimiento de Ingresos (%)</span>
+                                    <span id="valCrecimiento" class="font-bold text-cyan-400">+15%</span>
+                                </div>
+                                <input type="range" min="0" max="50" value="15" class="w-full accent-cyan-500 bg-slate-800 rounded cursor-pointer" oninput="runSimulacion()" id="sliderCrecimiento">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-300">Optimización de Gastos (%)</span>
+                                    <span id="valGastos" class="font-bold text-emerald-400">-10%</span>
+                                </div>
+                                <input type="range" min="0" max="30" value="10" class="w-full accent-emerald-500 bg-slate-800 rounded cursor-pointer" oninput="runSimulacion()" id="sliderGastos">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-300">Nivel de Endeudamiento (%)</span>
+                                    <span id="valDeuda" class="font-bold text-amber-400">38.5%</span>
+                                </div>
+                                <input type="range" min="10" max="70" value="38.5" step="0.5" class="w-full accent-amber-500 bg-slate-800 rounded cursor-pointer" oninput="runSimulacion()" id="sliderDeuda">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 mt-3">
+                        <span class="text-[10px] text-cyan-400 font-bold block mb-1"><i class="fa-solid fa-lightbulb mr-1"></i> Recomendación Algorítmica:</span>
+                        <p id="txtRecomendacion" class="text-[10px] text-slate-300 leading-relaxed">
+                            Mantener el incremento del 15% potenciará el margen neto por encima del 35%, sin comprometer el capital.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-6 bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex flex-col justify-between shadow-xl">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-200 mb-2 flex items-center">
+                            <i class="fa-solid fa-chart-line text-emerald-400 mr-2"></i> Proyección Dinámica
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Utilidad Neta Proyectada</span>
+                                <span id="simUtilidad" class="text-xl font-bold text-emerald-400 block mt-1">$78,200</span>
+                            </div>
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Liquidez Estimada</span>
+                                <span id="simLiquidez" class="text-xl font-bold text-cyan-400 block mt-1">2.65x</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative h-44 w-full flex items-center justify-center">
+                        <canvas id="simulacionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 px-5 py-2 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+        <span>Análisis Financiero Integral — Modelado Gerencial Avanzado</span>
+        <span class="text-cyan-400 font-semibold"><i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> Sistema Sincronizado OK</span>
+    </footer>
+
+    <script>
+        // Variables globales
+        let assetChartInstance, capitalChartInstance, simulacionChartInstance;
+
+        // Base de datos de KPIs para el Selector Interactivo
+        const kpiData = {
+            electro: {
+                liqVal: "2.30x", liqSub: "▲ Solvente", liqDesc: "Activo Cte / Pasivo Cte. Cubre de sobra las deudas de corto plazo.", liqColor: "text-emerald-400", valColor: "text-cyan-400",
+                marVal: "32.4%", marSub: "▲ Alta Rentabilidad", marDesc: "Utilidad Neta / Ventas Totales. Eficiencia operativa digital superior.", marColor: "text-emerald-400", valColorMar: "text-emerald-400",
+                endVal: "38.5%", endSub: "● Controlado", endDesc: "Pasivo Total / Activo Total. Baja exposición a pasivos onerosos.", endColor: "text-cyan-400", valColorEnd: "text-amber-400",
+                autVal: "61.5%", autSub: "▲ Independiente", autDesc: "Patrimonio Neto / Activo Total. Sólido respaldo de capital propio.", autColor: "text-emerald-400", valColorAut: "text-indigo-400"
+            },
+            tecno: {
+                liqVal: "1.25x", liqSub: "▼ Ajustada", liqDesc: "Cobertura justa; depende de rotar inventario físico.", liqColor: "text-amber-400", valColor: "text-amber-400",
+                marVal: "7.1%", marSub: "▼ Margen Estrecho", marDesc: "Alto costo de ventas erosiona la utilidad neta.", marColor: "text-rose-400", valColorMar: "text-rose-400",
+                endVal: "55.8%", endSub: "▲ Apalancada", endDesc: "Mayor dependencia de financiamiento externo.", endColor: "text-rose-400", valColorEnd: "text-rose-400",
+                autVal: "38.0%", autSub: "▼ Dependiente", autDesc: "Menor autonomía, requiere inyección de capital.", autColor: "text-amber-400", valColorAut: "text-amber-400"
+            },
+            comp: {
+                liqVal: "2.30x / 1.25x", liqSub: "Electro +84%", liqDesc: "ElectroTech duplica la capacidad de pago.", liqColor: "text-cyan-400", valColor: "text-white",
+                marVal: "32.4% / 7.1%", marSub: "Electro x4.5", marDesc: "Eficiencia del modelo digital triplica el retorno.", marColor: "text-cyan-400", valColorMar: "text-white",
+                endVal: "38% / 56%", endSub: "Tecno +18%", endDesc: "TecnoOrinoco soporta mayor carga de pasivos.", endColor: "text-amber-400", valColorEnd: "text-white",
+                autVal: "62% / 38%", autSub: "Electro +24%", autDesc: "ElectroTech mantiene independencia patrimonial.", autColor: "text-cyan-400", valColorAut: "text-white"
+            }
+        };
+
+        // Función para actualizar los KPIs según la empresa seleccionada
+        function setKpiView(mode) {
+            // Actualizar botones
+            ['electro', 'tecno', 'comp'].forEach(id => {
+                let btn = document.getElementById('kpiBtn' + id.charAt(0).toUpperCase() + id.slice(1));
+                btn.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white";
+            });
+            
+            let activeBtn = document.getElementById('kpiBtn' + mode.charAt(0).toUpperCase() + mode.slice(1));
+            if(mode === 'electro') activeBtn.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition bg-cyan-600 text-white shadow";
+            if(mode === 'tecno') activeBtn.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow";
+            if(mode === 'comp') activeBtn.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition bg-indigo-600 text-white shadow";
+
+            // Obtener datos
+            let data = kpiData[mode];
+
+            // Helper para setear atributos
+            const updateKpi = (id, val, sub, desc, colorClass, valColorClass) => {
+                const elVal = document.getElementById(id + '_val');
+                const elSub = document.getElementById(id + '_sub');
+                const elDesc = document.getElementById(id + '_desc');
+                
+                // Opacity animation effect
+                [elVal, elSub, elDesc].forEach(el => el.style.opacity = '0');
+                
+                setTimeout(() => {
+                    elVal.innerText = val;
+                    elVal.className = `text-sm font-bold font-mono kpi-transition ${valColorClass}`;
+                    
+                    elSub.innerText = sub;
+                    elSub.className = `text-[9px] block font-medium kpi-transition ${colorClass}`;
+                    
+                    elDesc.innerText = desc;
+                    
+                    [elVal, elSub, elDesc].forEach(el => el.style.opacity = '1');
+                }, 200);
+            };
+
+            updateKpi('kpi1', data.liqVal, data.liqSub, data.liqDesc, data.liqColor, data.valColor);
+            updateKpi('kpi2', data.marVal, data.marSub, data.marDesc, data.marColor, data.valColorMar);
+            updateKpi('kpi3', data.endVal, data.endSub, data.endDesc, data.endColor, data.valColorEnd);
+            updateKpi('kpi4', data.autVal, data.autSub, data.autDesc, data.autColor, data.valColorAut);
+        }
+
+        // Navegación principal
+        function switchTab(tab) {
+            ['Resumen', 'Balance', 'Pyg', 'Simulador'].forEach(t => {
+                document.getElementById('view' + t).classList.add('hidden');
+                document.getElementById('tab' + t).className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white";
+            });
+
+            document.getElementById('view' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-cyan-600 text-white shadow";
+
+            if (tab === 'resumen' && !assetChartInstance) initCharts();
+            if (tab === 'simulador' && !simulacionChartInstance) initSimulacionChart();
+        }
+
+        // Navegación de SubTabs (Balance / PyG)
+        function switchSubTab(tab) {
+            document.getElementById('subViewBalance').classList.add('hidden');
+            document.getElementById('subViewPyg').classList.add('hidden');
+            document.getElementById('subTabBalance').className = "px-2 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white";
+            document.getElementById('subTabPyg').className = "px-2 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white";
+
+            document.getElementById('subView' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+            document.getElementById('subTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = "px-2 py-1 rounded text-[10px] font-semibold transition bg-cyan-600 text-white shadow";
+        }
+
+        // Acordeón de detalles
+        function toggleDetail(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon_' + id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                el.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Semáforo Interactivo
+        function setSemaforo(estado) {
+            const btnV = document.getElementById('btnSemaforoVerde');
+            const btnA = document.getElementById('btnSemaforoAmarillo');
+            const btnR = document.getElementById('btnSemaforoRojo');
+            
+            const box = document.getElementById('semaforoBox');
+            const iconBg = document.getElementById('semaforoIconBg');
+            const icon = document.getElementById('semaforoIcon');
+            const title = document.getElementById('semaforoTitle');
+            const desc = document.getElementById('semaforoDesc');
+            const badge = document.getElementById('semaforoBadge');
+
+            btnV.className = btnA.className = btnR.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition text-slate-400 hover:text-white flex items-center";
+
+            if (estado === 'verde') {
+                btnV.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition bg-emerald-600 text-white shadow flex items-center";
+                box.className = "bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/60 flex items-center justify-between gap-3 mt-2";
+                iconBg.className = "bg-emerald-500/20 p-2 rounded-lg text-emerald-400 border border-emerald-500/30 shrink-0";
+                icon.className = "fa-solid fa-circle-check text-sm";
+                title.className = "text-xs font-bold text-emerald-400";
+                title.innerText = "[🟢 VERDE]: ElectroTech - Solvencia Óptima";
+                desc.innerText = "Liquidez > 2.0x y autonomía > 60%. Operación sin restricciones de caja.";
+                badge.className = "text-[10px] bg-emerald-900 text-emerald-200 px-2 py-1 rounded border border-emerald-700 shrink-0 font-mono";
+                badge.innerText = "Riesgo Bajo";
+            } else if (estado === 'amarillo') {
+                btnA.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow flex items-center";
+                box.className = "bg-amber-950/40 p-2.5 rounded-lg border border-amber-800/60 flex items-center justify-between gap-3 mt-2";
+                iconBg.className = "bg-amber-500/20 p-2 rounded-lg text-amber-400 border border-amber-500/30 shrink-0";
+                icon.className = "fa-solid fa-triangle-exclamation text-sm";
+                title.className = "text-xs font-bold text-amber-400";
+                title.innerText = "[🟡 AMARILLO]: TecnoOrinoco - Precaución";
+                desc.innerText = "Alta dependencia del inventario físico. Apalancamiento en 55.8%. Vigilar rotación.";
+                badge.className = "text-[10px] bg-amber-900 text-amber-200 px-2 py-1 rounded border border-amber-700 shrink-0 font-mono";
+                badge.innerText = "Riesgo Medio";
+            } else {
+                btnR.className = "px-2.5 py-1 rounded text-[10px] font-semibold transition bg-rose-600 text-white shadow flex items-center";
+                box.className = "bg-rose-950/40 p-2.5 rounded-lg border border-rose-800/60 flex items-center justify-between gap-3 mt-2";
+                iconBg.className = "bg-rose-500/20 p-2 rounded-lg text-rose-400 border border-rose-500/30 shrink-0";
+                icon.className = "fa-solid fa-radiation text-sm";
+                title.className = "text-xs font-bold text-rose-400";
+                title.innerText = "[🔴 ROJO]: Alerta de Liquidez Severa";
+                desc.innerText = "Escenario de estrés si la cobranza se detiene. Riesgo de default a corto plazo.";
+                badge.className = "text-[10px] bg-rose-900 text-rose-200 px-2 py-1 rounded border border-rose-700 shrink-0 font-mono";
+                badge.innerText = "Riesgo Alto";
+            }
+        }
+
+        // Gráficos Principales
+        function initCharts() {
+            const ctxAsset = document.getElementById('assetChart').getContext('2d');
+            assetChartInstance = new Chart(ctxAsset, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Activo Corriente', 'Activo No Corriente'],
+                    datasets: [{
+                        data: [61.3, 38.7],
+                        backgroundColor: ['#06b6d4', '#3b82f6'],
+                        borderWidth: 1,
+                        borderColor: '#0f172a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 9 }, boxWidth: 8 } } }
+                }
+            });
+
+            const ctxCap = document.getElementById('capitalChart').getContext('2d');
+            capitalChartInstance = new Chart(ctxCap, {
+                type: 'bar',
+                data: {
+                    labels: ['ElectroTech', 'TecnoOrinoco'],
+                    datasets: [{
+                        label: 'Pasivo',
+                        data: [38.5, 62.0],
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 3
+                    }, {
+                        label: 'Patrimonio',
+                        data: [61.5, 38.0],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: '#1e293b' }, max: 100 }
+                    },
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 8 }, boxWidth: 6 } } }
+                }
+            });
+        }
+
+        // Simulador
+        function initSimulacionChart() {
+            const ctxSim = document.getElementById('simulacionChart').getContext('2d');
+            simulacionChartInstance = new Chart(ctxSim, {
+                type: 'line',
+                data: {
+                    labels: ['Mes 1', 'Mes 3', 'Mes 6', 'Mes 9', 'Mes 12'],
+                    datasets: [{
+                        label: 'Utilidad Neta ($)',
+                        data: [68000, 71000, 74500, 76000, 78200],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function runSimulacion() {
+            const crecimiento = parseInt(document.getElementById('sliderCrecimiento').value);
+            const gastos = parseInt(document.getElementById('sliderGastos').value);
+            const deuda = parseFloat(document.getElementById('sliderDeuda').value);
+
+            document.getElementById('valCrecimiento').innerText = `+${crecimiento}%`;
+            document.getElementById('valGastos').innerText = `-${gastos}%`;
+            document.getElementById('valDeuda').innerText = `${deuda}%`;
+
+            let utilBase = 68000;
+            let nuevaUtil = Math.round(utilBase * (1 + (crecimiento / 100)) * (1 + (gastos / 200)));
+            let nuevaLiquidez = (2.30 + (crecimiento * 0.01) - (deuda * 0.005)).toFixed(2);
+
+            document.getElementById('simUtilidad').innerText = `$${nuevaUtil.toLocaleString()}`;
+            document.getElementById('simLiquidez').innerText = `${nuevaLiquidez}x`;
+
+            if (simulacionChartInstance) {
+                simulacionChartInstance.data.datasets[0].data = [68000, Math.round(nuevaUtil * 0.9), Math.round(nuevaUtil * 0.95), Math.round(nuevaUtil * 0.98), nuevaUtil];
+                simulacionChartInstance.update();
+            }
+        }
+
+        // Init App
+        document.addEventListener("DOMContentLoaded", function() {
+            initCharts();
+            // Iniciar por defecto en Comparativa o en ElectroTech
+            setKpiView('electro'); 
+        });
+
+    </script>
+</body>
+</html>
